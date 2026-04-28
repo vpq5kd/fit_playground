@@ -1,5 +1,8 @@
 # Fit Playground: A sandbox for our team to figure out what is going wrong with the fit code.
 
+## Build
+run `pip install -r requirements.txt` after downloading the repo. 
+
 ## `fit_study.py`
 This is the main program, run `python fit_study.py -h` to see available arguments. The easiest way to run this program is `python fit_study.py --scint_profile profiles/scintillation_profile.root --cheren_profile profiles/cherenkov_profile.root --folder events/ --scint_guess 0.9 --show_fit`. `--show_fit` can be replaced either by being deleted (which defaults to only showing a waveform) or by writing `--no_visualizations` instead, which doesn't show any of the waveforms at all and proceeds directly to the fit vs. expected scatter plot.
 
