@@ -45,13 +45,18 @@ class visualizations:
 
     def visualize_fit_vs_expected(self,cheren_expected_percents, cheren_fit_percents, amplitudes, particle, energy):
 
+        m, b = np.polyfit(cheren_expected_percents, cheren_fit_percents, 1)
+        x_vals = np.linspace(min(cheren_expected_percents), max(cheren_expected_percents), 100)
+        y_vals = m * x_vals + b
+
         plt.figure(figsize=(8,10))
         plot = plt.scatter(cheren_expected_percents, cheren_fit_percents, c = amplitudes, cmap='viridis')
+        plt.plot(x_vals, y_vals, linestyle='--', color = 'red')
         plt.colorbar(plot, label='amplitude')
 
         plt.xlabel(r"Cheren Expected Percentage")
         plt.ylabel(r"Cheren Fit Percentage")
-        plt.title(rF"Cheren Fit vs. Expected Percentage as a Function of Amplitude | Particle: {particle}, Energy: {energy}")
+        plt.title(rF"Cheren Fit vs. Expected Percentage as a Function of Amplitude | M: {m:.3f} | Particle: {particle}, Energy: {energy}")
 
 
         plt.show(block=False)

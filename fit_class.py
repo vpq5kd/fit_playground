@@ -27,7 +27,7 @@ class simulation_fitter:
         
         self.scint_interp, scint_xmin, scint_xmax = self.create_interpolator(scint_prof, 10)
         self.cheren_interp, cheren_xmin, cheren_xmax = self.create_interpolator(cheren_prof)
-        
+       
         self.xmin = max(float(scint_xmin), float(cheren_xmin))
         self.xmax = min(float(scint_xmax), float(cheren_xmax))
         

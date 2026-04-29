@@ -25,7 +25,7 @@ args = parser.parse_args()
 fp = folder_processor()
 df, df_scint_photons, df_cheren_photons = fp.process_folder(args.folder)
 
-sf = simulation_fitter(args.scint_profile, args.cheren_profile, df, df_scint_photons, df_cheren_photons)
+sf = simulation_fitter(args.scint_profile, args.cheren_profile, df, df_scint_photons, df_cheren_photons, args.sdl)
 sf.set_fit_guess(args.scint_guess,args.amplitude_guess)
 scint_interp, cheren_interp = sf.get_interpolators()
 
@@ -38,11 +38,14 @@ def handle_visualizations(data_x, data_y,scint_fraction,fit_amplitude):
         else:
             visualizer.visualize_data_without_fit(data_x, data_y)
 
-scint_time_correction = (300-300*(np.exp(-2/3)))/(300)
+#scint_time_correction = (300-300*(np.exp(-2/3)))/(300)
+scint_time_correction = 1
 
 amplitudes = []
 cheren_expected_percents = []
 cheren_fit_percents = []
+
+fit_x = np.linspace(sf.xmin, sf.xmax, 1024)
 
 for event in sf.df["event"].unique():
 
@@ -56,14 +59,24 @@ for event in sf.df["event"].unique():
 
         scint_expected_percent  = 100*(scint_photons)/(scint_photons + cheren_photons)
         cheren_expected_percent = 100*(cheren_photons)/(scint_photons + cheren_photons) 
+        
+        fit_scint_y = np.array([fit_amplitude*scint_fraction*scint_interp.Eval(x) for x in fit_x])
+        fit_cheren_y = np.array([fit_amplitude*(1-scint_fraction)*cheren_interp.Eval(x) for x in fit_x])
+        fit_total_y = fit_scint_y + fit_cheren_y
 
-
+        scint_fit_integral = np.trapezoid(fit_scint_y, fit_x)
+        cheren_fit_integral = np.trapezoid(fit_cheren_y, fit_x)
+        total_fit_integral = np.trapezoid(fit_total_y, fit_x)
+        
+        fit_scint_fraction = scint_fit_integral/total_fit_integral
+        fit_cheren_fraction = cheren_fit_integral/total_fit_integral
+        
         print("-"*50)
         print(f"Event: {event}")
         print(f"Data Amplitude: {expected_amplitude}")
         print(f"Fit Amplitude: {fit_amplitude}")
-        print(f"Scint fit percentage: {(scint_fraction*100):.3f}")
-        print(f"Cheren fit percentage: {((1-scint_fraction)*100):.3f}")
+        print(f"Scint fit percentage: {(fit_scint_fraction*100):.3f}")
+        print(f"Cheren fit percentage: {(fit_cheren_fraction*100):.3f}")
         print(f"Scint expected percentage: {scint_expected_percent:.3f}")
         print(f"Cheren expected percentage: {cheren_expected_percent:.3f}")
         print(f"Scint photon amount: {scint_photons}")
@@ -74,7 +87,7 @@ for event in sf.df["event"].unique():
         handle_visualizations(data_x, data_y, scint_fraction, fit_amplitude)
 
         amplitudes.append(expected_amplitude)
-        cheren_fit_percents.append((1-scint_fraction)*100)
+        cheren_fit_percents.append((fit_cheren_fraction)*100)
         cheren_expected_percents.append(cheren_expected_percent)
 
 visualizer.visualize_fit_vs_expected(cheren_expected_percents, cheren_fit_percents, amplitudes, args.particle, args.energy)
