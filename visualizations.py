@@ -58,8 +58,8 @@ class visualizations:
         plt.ylabel(r"Cheren Fit Percentage")
         plt.title(rF"Cheren Fit vs. Expected Percentage as a Function of Amplitude | M: {m:.3f} | Particle: {particle}, Energy: {energy}")
 
-
+        
+        plt.savefig("fit_vs_expected.png")
         plt.show(block=False)
-
         input("Press enter to close...")
         plt.close()
