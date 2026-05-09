@@ -85,7 +85,9 @@ class visualizations:
     def visualize_fit_vs_expected_histogram(self, cheren_fit_percents, cheren_expected_percents):
         cheren_fit_percents = np.array(cheren_fit_percents)
         cheren_expected_percents = np.array(cheren_expected_percents)
-
+        
+        fractions = cheren_fit_percents/cheren_expected_percents
+        print(np.mean(fractions))
         plt.figure()
         counts, bins = np.histogram(cheren_fit_percents/cheren_expected_percents,bins=30)
         plt.stairs(counts, bins, linewidth=2, color='black', fill=True, alpha=0.3)
@@ -93,5 +95,5 @@ class visualizations:
         plt.ylabel("Counts")
         plt.title(r"$\frac{Č_{fit}\%}{Č_{expected}\%}$ Distribution")
         plt.show(block=False)
-        input("Press enter to close")
+        input("Press enter to close...")
         plt.close()

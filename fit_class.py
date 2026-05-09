@@ -25,7 +25,7 @@ class simulation_fitter:
 
         self.sdl_number = sdl_number
         
-        self.scint_interp, scint_xmin, scint_xmax = self.create_interpolator(scint_prof, 10)
+        self.scint_interp, scint_xmin, scint_xmax = self.create_interpolator(scint_prof)
         self.cheren_interp, cheren_xmin, cheren_xmax = self.create_interpolator(cheren_prof)
        
         self.xmin = max(float(scint_xmin), float(cheren_xmin))
