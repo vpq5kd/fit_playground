@@ -61,7 +61,7 @@ class simulation_fitter:
 
         interp = ROOT.Math.Interpolator(len(x), ROOT.Math.Interpolation.kCSPLINE)
         #integral = np.trapezoid(y,x)
-        interp.SetData(len(x), x, y/np.max(y))
+        interp.SetData(len(x), x, y)
 
         return interp, x.min(), x.max()
 
@@ -107,17 +107,17 @@ class simulation_fitter:
 
     def interp_fit_func(self, x, par):
         t = x[0]
-        f = par[0]
-        A = par[1]
+        a = par[0]
+        b = par[1]
         scint_val = self.scint_interp.Eval(t)
         cheren_val = self.cheren_interp.Eval(t)
 
-        return A*((f)*scint_val + (1-f)*cheren_val)
+        return a*scint_val + b*cheren_val
     
 
-    def set_fit_guess(self, fraction_guess, amplitude_guess):
+    def set_fit_guess(self, scint_photon_guess, cheren_photon_guess):
         fit_func = ROOT.TF1("fit_func", self.interp_fit_func, self.xmin,self.xmax,2)
-        fit_func.SetParameters(fraction_guess, amplitude_guess)
+        fit_func.SetParameters(scint_photon_guess, cheren_photon_guess)
 
         self.fit_func = fit_func
 
@@ -129,11 +129,11 @@ class simulation_fitter:
         
         scint_photons, cheren_photons = self.get_photon_data_by_event(event, data_x_coord, data_y_coord)
 
-        scint_fraction = self.fit_func.GetParameter(0)
-        fit_amplitude = self.fit_func.GetParameter(1)
+        scint_photon_guess = self.fit_func.GetParameter(0)
+        cheren_photon_guess = self.fit_func.GetParameter(1)
 
         expected_amplitude = data_y.max()
 
-        return scint_fraction, fit_amplitude, expected_amplitude, scint_photons, cheren_photons
+        return scint_photon_guess, cheren_photon_guess, expected_amplitude, scint_photons, cheren_photons
 
 
