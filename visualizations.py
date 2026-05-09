@@ -10,6 +10,21 @@ class visualizations:
         self.scint_interp = scint_interp
         self.cheren_interp = cheren_interp
 
+    def visualize_interpolators(self):
+        t = np.linspace(self.xmin, self.xmax, 1024)
+        s = np.array([self.scint_interp.Eval(x) for x in t])
+        c = np.array([self.cheren_interp.Eval(x) for x in t])
+        plt.figure()
+        plt.plot(t, s, color='gold',label='scint interp')
+        plt.plot(t, c, color='blue',label='cheren interp')
+        plt.legend()
+        plt.xlabel(f"Time (ns)")
+        plt.ylabel(f"Voltage (mv)")
+        plt.show(block=False)
+
+        input("Press enter to close interpolator visualization...")
+        plt.close()
+
     def visualize_data_without_fit(self, data_x, data_y):
         plt.figure()
         plt.plot(data_x, data_y,label='Data Only',color='black')
@@ -21,14 +36,12 @@ class visualizations:
         input("Press enter to cycle the next event...")
         plt.close()
 
-    def visualize_data_with_fit(self, data_x, data_y, scint_fraction, fit_amplitude):
+    def visualize_data_with_fit(self, data_x, data_y, sp, cp):
 
-        A = fit_amplitude
-        f = scint_fraction
 
         ts = np.linspace(self.xmin, self.xmax, 1024)
-        sc = np.array([A*f*self.scint_interp.Eval(t) for t in ts])
-        ch = np.array([A*(1-f)*self.cheren_interp.Eval(t) for t in ts])
+        sc = np.array([sp*self.scint_interp.Eval(t) for t in ts])
+        ch = np.array([cp*self.cheren_interp.Eval(t) for t in ts])
         plt.figure()
         plt.plot(data_x,data_y, color='black', label='data')
         plt.plot(ts, sc, color='orange', label='scint fit curve')
@@ -45,11 +58,16 @@ class visualizations:
 
     def visualize_fit_vs_expected(self,cheren_expected_percents, cheren_fit_percents, amplitudes, particle, energy):
 
-        m, b = np.polyfit(cheren_expected_percents, cheren_fit_percents, 1)
+
+
+        coeffs, cov = np.polyfit(cheren_expected_percents, cheren_fit_percents, 1, cov=True)
+        m, b = coeffs
+        m_err = np.sqrt(cov[0,0])
+        print(f"m_err = {m_err}")
         x_vals = np.linspace(min(cheren_expected_percents), max(cheren_expected_percents), 100)
         y_vals = m * x_vals + b
 
-        plt.figure(figsize=(8,10))
+        plt.figure(figsize=(10,14))
         plot = plt.scatter(cheren_expected_percents, cheren_fit_percents, c = amplitudes, cmap='viridis')
         plt.plot(x_vals, y_vals, linestyle='--', color = 'red')
         plt.colorbar(plot, label='amplitude')
@@ -60,6 +78,22 @@ class visualizations:
 
         
         plt.savefig("fit_vs_expected.png")
+        plt.show(block=False)
+        input("Press enter to close...")
+        plt.close()
+
+    def visualize_fit_vs_expected_histogram(self, cheren_fit_percents, cheren_expected_percents):
+        cheren_fit_percents = np.array(cheren_fit_percents)
+        cheren_expected_percents = np.array(cheren_expected_percents)
+        
+        fractions = cheren_fit_percents/cheren_expected_percents
+        print(np.mean(fractions))
+        plt.figure()
+        counts, bins = np.histogram(cheren_fit_percents/cheren_expected_percents,bins=30)
+        plt.stairs(counts, bins, linewidth=2, color='black', fill=True, alpha=0.3)
+        plt.xlabel(r"$\frac{Č_{fit}\%}{Č_{expected}\%}$")
+        plt.ylabel("Counts")
+        plt.title(r"$\frac{Č_{fit}\%}{Č_{expected}\%}$ Distribution")
         plt.show(block=False)
         input("Press enter to close...")
         plt.close()

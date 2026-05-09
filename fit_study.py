@@ -9,16 +9,17 @@ from fit_class import simulation_fitter
 from folder_processor import folder_processor
 from visualizations import visualizations
 
-parser = argparse.ArgumentParser('2D Histogram of simple digis tree')
+parser = argparse.ArgumentParser('Fit Study Arguments')
 parser.add_argument('--scint_profile', type=str, help='root file with scint profile hist')
 parser.add_argument('--cheren_profile', type=str, help='root file with cheren profile hist')
 parser.add_argument('-f','--folder',type=str, help='root folder to fit')
-parser.add_argument('--scint_guess', type=float, help='guess of percentage scintillation for fit')
-parser.add_argument('--amplitude_guess',type=float,default=50)
+parser.add_argument('--scint_guess', type=float, default=10000, help='guess of percentage scintillation for fit')
+parser.add_argument('--amplitude_guess',type=float,default=40000)
 parser.add_argument('--sdl', type=int, default=0, help='Use if you would like to run the SDL version, add an integer in ns after --sdl')
 parser.add_argument('--particle',type=str,default='e-')
 parser.add_argument('--energy',type=str,default='20GeV')
 parser.add_argument('--show_fit', action='store_true')
+parser.add_argument('--show_interpolators', action='store_true')
 parser.add_argument('--no_visualizations', action='store_true')
 args = parser.parse_args()
 
@@ -31,10 +32,12 @@ scint_interp, cheren_interp = sf.get_interpolators()
 
 visualizer = visualizations(scint_interp, cheren_interp)
 
-def handle_visualizations(data_x, data_y,scint_fraction,fit_amplitude):
+def handle_visualizations(data_x, data_y, sp, cp):
+    if args.show_interpolators:
+        visualizer.visualize_interpolators()
     if not args.no_visualizations:
         if args.show_fit:
-            visualizer.visualize_data_with_fit(data_x, data_y, scint_fraction, fit_amplitude)
+            visualizer.visualize_data_with_fit(data_x, data_y, sp, cp)
         else:
             visualizer.visualize_data_without_fit(data_x, data_y)
 
@@ -53,28 +56,19 @@ for event in sf.df["event"].unique():
 
     for data_x, data_y, data_x_coord, data_y_coord in data:
 
-        scint_fraction, fit_amplitude, expected_amplitude, scint_photons, cheren_photons = sf.fit_data(data_x, data_y, data_x_coord, data_y_coord, event, args.particle, args.energy)
+        scint_photon_guess, cheren_photon_guess, expected_amplitude, scint_photons, cheren_photons = sf.fit_data(data_x, data_y, data_x_coord, data_y_coord, event, args.particle, args.energy)
 
         scint_photons *= scint_time_correction
 
         scint_expected_percent  = 100*(scint_photons)/(scint_photons + cheren_photons)
         cheren_expected_percent = 100*(cheren_photons)/(scint_photons + cheren_photons) 
         
-        fit_scint_y = np.array([fit_amplitude*scint_fraction*scint_interp.Eval(x) for x in fit_x])
-        fit_cheren_y = np.array([fit_amplitude*(1-scint_fraction)*cheren_interp.Eval(x) for x in fit_x])
-        fit_total_y = fit_scint_y + fit_cheren_y
-
-        scint_fit_integral = np.trapezoid(fit_scint_y, fit_x)
-        cheren_fit_integral = np.trapezoid(fit_cheren_y, fit_x)
-        total_fit_integral = np.trapezoid(fit_total_y, fit_x)
-        
-        fit_scint_fraction = scint_fit_integral/total_fit_integral
-        fit_cheren_fraction = cheren_fit_integral/total_fit_integral
-        
+        total_fit_guess = scint_photon_guess + cheren_photon_guess
+        fit_scint_fraction = scint_photon_guess/(total_fit_guess)
+        fit_cheren_fraction = cheren_photon_guess/(total_fit_guess)
         print("-"*50)
         print(f"Event: {event}")
         print(f"Data Amplitude: {expected_amplitude}")
-        print(f"Fit Amplitude: {fit_amplitude}")
         print(f"Scint fit percentage: {(fit_scint_fraction*100):.3f}")
         print(f"Cheren fit percentage: {(fit_cheren_fraction*100):.3f}")
         print(f"Scint expected percentage: {scint_expected_percent:.3f}")
@@ -84,10 +78,11 @@ for event in sf.df["event"].unique():
         print(f"ix: {data_x_coord}")
         print(f"iy: {data_y_coord}")
 
-        handle_visualizations(data_x, data_y, scint_fraction, fit_amplitude)
+        handle_visualizations(data_x, data_y, scint_photon_guess, cheren_photon_guess)
 
         amplitudes.append(expected_amplitude)
         cheren_fit_percents.append((fit_cheren_fraction)*100)
         cheren_expected_percents.append(cheren_expected_percent)
 
+visualizer.visualize_fit_vs_expected_histogram(cheren_fit_percents, cheren_expected_percents)
 visualizer.visualize_fit_vs_expected(cheren_expected_percents, cheren_fit_percents, amplitudes, args.particle, args.energy)
