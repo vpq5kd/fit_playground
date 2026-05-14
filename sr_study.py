@@ -44,9 +44,9 @@ def handle_visualizations(data_x, data_y, sp, cp):
 
 #scint_time_correction = (300-300*(np.exp(-2/3)))/(300)
 
-cmap = plt.get_cmap('plasma')
+cmap = plt.get_cmap('cool')
 plot_tuple_array = []
-step_array = [1,2,4,8]
+step_array = [1,2,4,8,16,32]
 for step_index, step in enumerate(step_array):
     print(f"Running study on {5/step:.3f}gHz")
     
@@ -86,7 +86,7 @@ for step_index, step in enumerate(step_array):
             cheren_expected_percents.append(cheren_expected_percent)
     
     label = f"{5/step:.3f}gHz"
-    color = cmap(step_index)
+    color = cmap(step_index/(len(step_array)-1))
     plot_tuple = (cheren_fit_percents, cheren_expected_percents, label, color)
     plot_tuple_array.append(plot_tuple)
 
