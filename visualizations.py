@@ -102,3 +102,23 @@ class visualizations:
         plt.show(block=False)
         input("Press enter to close...")
         plt.close()
+
+
+    def visualize_rate_sampling_histograms(self, plot_tuple_array):
+        
+        plt.figure()
+        for cheren_fit_percents, cheren_expected_percents, label, color in plot_tuple_array:
+            cheren_fit_percents = np.array(cheren_fit_percents)
+            cheren_expected_percents = np.array(cheren_expected_percents)
+            
+            fractions = cheren_fit_percents/cheren_expected_percents
+            counts, bins = np.histogram(cheren_fit_percents/cheren_expected_percents,bins=30)
+            plt.stairs(counts, bins, linewidth=2, color=color, fill=True, alpha=0.3, label=label)
+            plt.axvline(np.mean(fractions),linestyle='--',color='mediumvioletred',label=f'{label} Mean: {np.mean(fractions):.3f}')
+        plt.legend()
+        plt.xlabel(r"$\frac{Č_{fit}\%}{Č_{expected}\%}$")
+        plt.ylabel("Counts")
+        plt.title(r"$\frac{Č_{fit}\%}{Č_{expected}\%}$ Distribution")
+        plt.show(block=False)
+        input("Press enter to close...")
+        plt.close()

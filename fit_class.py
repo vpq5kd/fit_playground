@@ -122,16 +122,21 @@ class simulation_fitter:
         self.fit_func = fit_func
 
 
-    def fit_data(self, data_x, data_y, data_x_coord, data_y_coord, event, particle, energy):
+    def fit_data(self, data_x, data_y, data_x_coord, data_y_coord, event, particle, energy, step=0):
+       
+        if step != 0:
+            data_x = np.ascontiguousarray(data_x[::step], dtype=np.float64)
+            data_y = np.ascontiguousarray(data_y[::step], dtype=np.float64)
         
-        step = 2
-        data_x = np.asarray(data_x[::step], dtype=np.float64)
-        data_y = np.asarray(data_y[::step], dtype=np.float64)
-        print(type(data_x), data_x.dtype, data_x.shape)
-        print(type(data_y), data_y.dtype, data_y.shape)
-        graph = ROOT.TGraph(len(data_x), data_x, data_y)
-        graph.SetTitle(f"Particle: {particle}, Energy: {energy}, Layer: 1, Event: {event}")
-        graph.Fit(self.fit_func, "R")
+        dx = data_x[1] - data_x[0]
+        edges = np.concatenate(([data_x[0] - dx/2], data_x + dx/2))
+        hist = ROOT.TH1F("","",len(data_x), edges)
+        for i in range(len(data_x)):
+            hist.SetBinContent(i+1, data_y[i])
+            #hist.SetBinError(i + 1, 1.0)
+        #graph = ROOT.TGraph(len(data_x), data_x, data_y)
+        hist.SetTitle(f"Particle: {particle}, Energy: {energy}, Layer: 1, Event: {event}")
+        hist.Fit(self.fit_func, "RWW0")
         scint_photons, cheren_photons = self.get_photon_data_by_event(event, data_x_coord, data_y_coord)
 
         scint_photon_guess = self.fit_func.GetParameter(0)
