@@ -32,9 +32,10 @@ scint_interp, cheren_interp = sf.get_interpolators()
 
 visualizer = visualizations(scint_interp, cheren_interp)
 
+if args.show_interpolators:
+    visualizer.visualize_interpolators()
+
 def handle_visualizations(data_x, data_y, sp, cp):
-    if args.show_interpolators:
-        visualizer.visualize_interpolators()
     if not args.no_visualizations:
         if args.show_fit:
             visualizer.visualize_data_with_fit(data_x, data_y, sp, cp)
