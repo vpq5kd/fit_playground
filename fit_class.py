@@ -123,10 +123,15 @@ class simulation_fitter:
 
 
     def fit_data(self, data_x, data_y, data_x_coord, data_y_coord, event, particle, energy):
+        
+        step = 2
+        data_x = np.asarray(data_x[::step], dtype=np.float64)
+        data_y = np.asarray(data_y[::step], dtype=np.float64)
+        print(type(data_x), data_x.dtype, data_x.shape)
+        print(type(data_y), data_y.dtype, data_y.shape)
         graph = ROOT.TGraph(len(data_x), data_x, data_y)
         graph.SetTitle(f"Particle: {particle}, Energy: {energy}, Layer: 1, Event: {event}")
         graph.Fit(self.fit_func, "R")
-        
         scint_photons, cheren_photons = self.get_photon_data_by_event(event, data_x_coord, data_y_coord)
 
         scint_photon_guess = self.fit_func.GetParameter(0)
