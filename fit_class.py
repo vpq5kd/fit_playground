@@ -122,11 +122,10 @@ class simulation_fitter:
         self.fit_func = fit_func
 
 
-    def fit_data(self, data_x, data_y, data_x_coord, data_y_coord, event, particle, energy, step=0):
+    def fit_data(self, data_x, data_y, data_x_coord, data_y_coord, event, particle, energy, step=1):
        
-        if step != 0:
-            data_x = np.ascontiguousarray(data_x[::step], dtype=np.float64)
-            data_y = np.ascontiguousarray(data_y[::step], dtype=np.float64)
+        data_x = np.ascontiguousarray(data_x[::step], dtype=np.float64)
+        data_y = np.ascontiguousarray(data_y[::step], dtype=np.float64)
         
         dx = data_x[1] - data_x[0]
         edges = np.concatenate(([data_x[0] - dx/2], data_x + dx/2))
