@@ -45,7 +45,7 @@ def main():
         width_array.append(width)
 
         
-    data_dict = {"Sampling Rate":label_array, "Lower":lower_array, "Upper":upper_array, "Width":width_array}
+    data_dict = {"Sampling Rate":label_array, "Lower":lower_array, "Upper":upper_array, "Width/2":np.array(width_array)/2}
     df = pd.DataFrame(data_dict)
     df.to_csv("sr_min68.csv", index=False, float_format="%.3f")
     
