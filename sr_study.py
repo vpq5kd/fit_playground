@@ -90,4 +90,5 @@ for step_index, step in enumerate(step_array):
     plot_tuple = (cheren_fit_percents, cheren_expected_percents, label, color)
     plot_tuple_array.append(plot_tuple)
 
+np.savez("sr_study_data.npz", plot_tuple_array=np.array(plot_tuple_array, dtype=object))
 visualizer.visualize_rate_sampling_histograms(plot_tuple_array, bins=15)
