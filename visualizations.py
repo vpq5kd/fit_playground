@@ -124,4 +124,26 @@ class visualizations:
         input("Press enter to close...")
         plt.close()
 
+    def visualize_sr_study_waveforms(self, data_x, data_y, steps):
+
+        cmap = plt.get_cmap('cool')
+        plt.figure()
+        
+        for step_index, step in enumerate(steps):
+            data_down_sampled_x = np.ascontiguousarray(data_x[::step], dtype=np.float64)
+            data_down_sampled_y = np.ascontiguousarray(data_y[::step], dtype=np.float64)
+            label = f"{5/step:.3f}gHz"
+            color = cmap(step_index/(len(steps)-1))
+            plt.plot(data_down_sampled_x, data_down_sampled_y, color=color, label=label)
+
+        plt.legend()
+        plt.xlabel("Time (ns)")
+        plt.ylabel("Voltage (mv)")
+        plt.title("Comparison of Waveforms at Different Sampling Rates")
+        plt.show(block=False)
+        input("Press enter to close...")
+        plt.close()
+
+
+
     
