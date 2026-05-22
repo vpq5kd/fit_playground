@@ -4,7 +4,7 @@ import pandas as pd
 
 class visualizations:
 
-    def __init__(self, scint_interp,cheren_interp):
+    def __init__(self, scint_interp=None, cheren_interp=None):
         self.xmin = 0
         self.xmax = 204.8
         self.scint_interp = scint_interp
@@ -144,6 +144,55 @@ class visualizations:
         input("Press enter to close...")
         plt.close()
 
+    def visualize_phase_effect_histograms(self, frequency_plot_arrays, bins=30):
+
+        for index, plot_tuple_array in enumerate(frequency_plot_arrays):
+
+            plt.figure()
+            for cheren_fit_percents, cheren_expected_percents, label, color, title in plot_tuple_array:
+                
+                cheren_fit_percents = np.array(cheren_fit_percents)
+                cheren_expected_percents = np.array(cheren_expected_percents)
+                
+                fractions = cheren_fit_percents/cheren_expected_percents
+                counts, bins = np.histogram(cheren_fit_percents/cheren_expected_percents,bins=30)
+                plt.stairs(counts, bins, linewidth=2, color=color, fill=True, alpha=0.7, label=label)
+                plt.axvline(np.mean(fractions),linestyle='--',color=color,label=f'{label} Mean: {np.mean(fractions):.3f}')
+
+            plt.legend()
+            plt.xlabel(r"$\frac{Č_{fit}\%}{Č_{expected}\%}$")
+            plt.ylabel("Counts")
+            plt.title(r"$\frac{Č_{fit}\%}{Č_{expected}\%}$ Distributions for Different Starting Points at "+title)
+            plt.show(block=False)
+
+            if index == len(frequency_plot_arrays)-1:
+                input("Press enter to close...")
+            else:
+                input("Press enter to show next...")
+
+            plt.close()
 
 
-    
+
+    def visualize_phase_study_waveforms(self, data_x, data_y, offsets):
+
+        cmap = plt.get_cmap('cool')
+        plt.figure()
+
+        for offsets_index, offset in enumerate(offsets):
+            data_down_sampled_x = np.ascontiguousarray(data_x[offset:], dtype=np.float64)
+            data_down_sampled_y = np.ascontiguousarray(data_y[offset:], dtype=np.float64)
+            data_down_sampled_x = data_down_sampled_x[::32]
+            data_down_sampled_y = data_down_sampled_y[::32]
+            label = f"{0.2*offset:.3f} ns"
+            color = cmap(offsets_index/(len(offsets)-1))
+            plt.scatter(data_down_sampled_x, data_down_sampled_y, color=color, label=label)
+
+        plt.legend()
+        plt.xlabel("Time (ns)")
+        plt.ylabel("Voltage (mv)")
+        plt.title("Comparison of Waveforms at Different Offsets at 156 MHz")
+        plt.show(block=False)
+        input("Press enter to close...")
+        plt.close()
+ 

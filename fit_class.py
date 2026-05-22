@@ -122,11 +122,21 @@ class simulation_fitter:
         self.fit_func = fit_func
 
 
-    def fit_data(self, data_x, data_y, data_x_coord, data_y_coord, event, particle, energy, step=1):
-       
+    def change_data_phase(self, data_x, data_y, start_point):
+        return data_x[start_point:], data_y[start_point:]
+
+    def change_data_sampling_rate(self, data_x, data_y, step):
+
         data_x = np.ascontiguousarray(data_x[::step], dtype=np.float64)
         data_y = np.ascontiguousarray(data_y[::step], dtype=np.float64)
-        
+
+        return data_x, data_y
+
+    def fit_data(self, data_x, data_y, data_x_coord, data_y_coord, event, particle, energy, step=1, start_point=0):
+       
+        data_x, data_y = self.change_data_phase(data_x, data_y, start_point)
+        data_x, data_y = self.change_data_sampling_rate(data_x, data_y, step)
+
         dx = data_x[1] - data_x[0]
         edges = np.concatenate(([data_x[0] - dx/2], data_x + dx/2))
         hist = ROOT.TH1F("","",len(data_x), edges)

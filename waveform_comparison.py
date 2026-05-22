@@ -29,13 +29,13 @@ scint_interp, cheren_interp = sf.get_interpolators()
 
 visualizer = visualizations(scint_interp, cheren_interp)
 
-steps = [1,2,4,8,16,32]
+offsets = np.arange(15)
 
 for event in sf.df["event"].unique():
 
     data = sf.get_signal_data_by_event(event)
 
     for data_x, data_y, data_x_coord, data_y_coord in data:
-            visualizer.visualize_sr_study_waveforms(data_x, data_y, steps)
+            visualizer.visualize_phase_study_waveforms(data_x, data_y, offsets)
 
     
